@@ -1,0 +1,6 @@
+read test.lp
+set limits time 300
+optimize
+display solution
+write solution test.sol
+quit
