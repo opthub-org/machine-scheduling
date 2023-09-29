@@ -6,6 +6,7 @@ import re
 import time
 from typing import List
 from traceback import format_exc
+
 import model
 
 problem_file = "work_test.txt"
@@ -63,31 +64,32 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-# s: str = input()  # [1, 2, ...]
-# solution: List[int] = json.loads(s)
-# ここでフォーマットの検証などをjsonschemavalidationでやる
-# 設計変数の数：ワークの総加工数の2倍（取付、取外）
-# 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
-# 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
-# obj: float = evaluation(solution)
-# cnst: List[float] = # 各ワーク(15個)の納期違反量
-# ret = {"objective": obj, "constraint": cnst, "error": null}
-# print(json.dumps(ret))
+def evaluation(solution: List[int], timeout: int = 300) -> float:
+    """SCIPを起動して評価値を計算する。
 
+    Parameter
+    ---------
+    solution
+        [work1_load, work1_unload, work2_load, ...]
+    timeout
+        Time limit for SCIP
 
-def evaluation(solution: List[int]) -> float:
-    """評価値の計算(SCIP)"""
+    Return
+    ------
+    float
+        Objective function value.
+    """
     obj = float("-inf")
     model.write_lp(solution, lp_file, problem_file, jig_file)
-    with open("command.txt", "w") as f:
-        f.write("read {}\n".format(lp_file))
-        f.write("set limits time 300\n")  # ここを変数にする
+    with open(scip_command_file, "w") as f:
+        f.write(f"read {lp_file}\n")
+        f.write(f"set limits time {timeout}\n")
         f.write("optimize\n")
         f.write("display solution\n")
-        f.write("write solution {}\n".format(sol_file))
+        f.write(f"write solution {sol_file}\n")
         f.write("quit")
     subprocess.run(
-        "scip -l Log/Log{}.log -b {}".format(int(time.time()), scip_command_file),
+        f"scip -l Log/Log{int(time.time())}.log -b {scip_command_file}",
         shell=True,
     )
 
@@ -106,6 +108,11 @@ def evaluation(solution: List[int]) -> float:
 def main():
     var_json = input()
     var = json.loads(var_json)
+    # ここでフォーマットの検証などをjsonschemaでやる
+    # 設計変数の数：ワークの総加工数の2倍（取付、取外）
+    # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
+    # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
+
     obj = evaluation(var)
     out_json = json.dumps({"objective": obj, "constraint": None, "error": None})
     print(out_json)
