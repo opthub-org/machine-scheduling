@@ -1,4 +1,8 @@
 .DS_Store
+Log/Log*.log
+/log.txt
+/test.lp
+/test.sol
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
