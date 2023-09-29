@@ -1,32 +1,17 @@
-import csv
 import os.path
 import random
-import subprocess
 import copy
 import re
-import time
+from typing import List
 
-import model
+import problem
 
-problem_file = "work_test.txt"
-jig_file = "jig_origin.csv"
-scip_command_file = "command.txt"
-lp_file = "test.lp"
-sol_file = "test.sol"
 g = 30  # 世代数
 p_cross = 0.5  # 交叉率
 p_mutate = 0.015  # 突然変異確率
 D = 5  # スケジュール日数
 N = 10  # 個体数
 file_num = 27  # 初期解読み込み時の検索ファイル数
-
-
-def load_problem():
-    with open(problem_file, "r") as f:
-        data = f.readlines()
-    data = [row.replace("\n", "").split(" ") for row in data]
-
-    return data
 
 
 def load_sample_sol(n):
@@ -51,10 +36,18 @@ def load_sample_sol(n):
             if row.startswith("y("):
                 sep_row = row.strip("\n").split(" ")
                 sep_row = [s for s in sep_row if not s == ""]
-                k_d.update({int(re.findall(r",(.*)\)", sep_row[0])[0]): int(re.findall(r"\((.*),", sep_row[0])[0])})
+                k_d.update(
+                    {
+                        int(re.findall(r",(.*)\)", sep_row[0])[0]): int(
+                            re.findall(r"\((.*),", sep_row[0])[0]
+                        )
+                    }
+                )
         if obj == float("-inf") or obj >= 75000:
             continue
-        sol_list.append([d[1] for d in sorted(k_d.items(), key=lambda x: x[0]) if d[0] > 36])
+        sol_list.append(
+            [d[1] for d in sorted(k_d.items(), key=lambda x: x[0]) if d[0] > 36]
+        )
         eval_list.append(obj)
 
     return sol_list, eval_list
@@ -70,8 +63,12 @@ def crossover(current_sol):
         # 交叉位置は必ず取り付けから
         if random.random() < p_cross:
             index = random.randint(1, int(len(current_sol[0]) / 2) - 1)
-            new_sol.append(current_sol[i * 2][:index * 2] + current_sol[i * 2 + 1][index * 2:])
-            new_sol.append(current_sol[i * 2 + 1][:index * 2] + current_sol[i * 2][index * 2:])
+            new_sol.append(
+                current_sol[i * 2][: index * 2] + current_sol[i * 2 + 1][index * 2 :]
+            )
+            new_sol.append(
+                current_sol[i * 2 + 1][: index * 2] + current_sol[i * 2][index * 2 :]
+            )
 
     return new_sol
 
@@ -86,7 +83,12 @@ def mutation(sol_list, problem_data):
     for i in range(len(problem_data)):
         available_days.append(int(problem_data[i][-2]))
         available_days.append(int(problem_data[i][-2]))
-        task_list[i + 1] = [j for j in range(task_num + 1, task_num + int(len(problem_data[i]) / 7) * 3 + 1)]
+        task_list[i + 1] = [
+            j
+            for j in range(
+                task_num + 1, task_num + int(len(problem_data[i]) / 7) * 3 + 1
+            )
+        ]
         task_num = task_list[i + 1][-1]
 
     for sol in sol_list:
@@ -137,7 +139,7 @@ def roulette(sol_list, eval_list):
     while len(return_sols) < N:
         p = random.random()
         for i in range(len(table)):
-            if p < sum(table[:i + 1]):
+            if p < sum(table[: i + 1]):
                 return_sols.append(sol_list[i].copy())
                 return_evals.append(eval_list[i])
                 break
@@ -145,33 +147,8 @@ def roulette(sol_list, eval_list):
     return return_sols, return_evals
 
 
-def evaluation(solution):
-    """評価値の計算(SCIP)"""
-    obj = float("-inf")
-    model.write_lp(solution, lp_file, problem_file, jig_file)
-    with open("command.txt", "w") as f:
-        f.write("read {}\n".format(lp_file))
-        f.write("set limits time 300\n")
-        f.write("optimize\n")
-        f.write("display solution\n")
-        f.write("write solution {}\n".format(sol_file))
-        f.write("quit")
-    subprocess.run("scip -l Log/Log{}.log -b {}".format(int(time.time()), scip_command_file), shell=True)
-
-    if os.path.isfile(lp_file):
-        with open(sol_file, "r") as f:
-            data = f.readlines()
-            for row in data:
-                if "objective value:" in row:
-                    obj = float(row.strip("\n").split(" ")[-1])
-                    break
-        os.remove(sol_file)
-
-    return obj
-
-
 def main():
-    problem_data = load_problem()
+    problem_data = problem.load_problem()
     global N
     sol_list, eval_list = load_sample_sol(N)
     N = len(sol_list)
@@ -184,7 +161,7 @@ def main():
         mutation(new_sol, problem_data[13:])
         new_eval = []
         for sol in copy.deepcopy(new_sol):
-            e = evaluation(sol)
+            e = problem.evaluation(sol)
             if not e == float("-inf"):
                 new_eval.append(e)
                 log[i + 1].append("update")
@@ -208,5 +185,5 @@ def main():
             f.write(str(v) + ": " + ",".join([str(l) for l in log[v]]) + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

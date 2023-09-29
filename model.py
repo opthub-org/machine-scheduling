@@ -1,5 +1,6 @@
 import copy
 import csv
+from typing import List
 
 # 納期を付加したバージョン
 # 前のctt書式にも対応
@@ -33,7 +34,12 @@ def jig_num(st_num, num):
     return jig_list, count
 
 
-def write_lp(solution=None, lp_file="test.lp", work_file="work.txt", jig_file="jig.csv"):
+def write_lp(
+    solution: List[int]=None,  # 日付割り当てリスト
+    lp_file="test.lp",  # 生成する問題ファイル名（送信された解から生成する）
+    work_file="work.txt",  # ワークの定義ファイル（問題ごとに固定）
+    jig_file="jig.csv"  # 治具の定義ファイル（問題ごとに固定）
+):
     if solution is None:
         solution = []
     with open(work_file) as f:

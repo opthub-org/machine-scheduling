@@ -260,11 +260,16 @@
 3 directories, 250 files
 ```
 
-# Dependencies
+## Dependencies
 - Python 3.7+
-- Python 3.7+
+- SCIP 8.0+
 
-# Usage
+## Build
+```
+docker build . -t opthub/machine-scheduling:latest
+```
+
+## Usage
 
 ```
 python main.py
