@@ -261,8 +261,7 @@
 ```
 
 ## Dependencies
-- Python 3.7+
-- SCIP 8.0+
+- Docker
 
 ## Build
 ```
@@ -270,7 +269,17 @@ docker build . -t opthub/machine-scheduling:latest
 ```
 
 ## Usage
-
+コンテナを起動すると入力待ちになる。
 ```
-python main.py
+docker run -it opthub/machine-scheduling:latest
+```
+
+解を入力し、Enterを押す。
+```json
+[1,2,3,4,5,6,7,8,9]
+```
+
+しばらく待つと評価値が出力される。
+```json
+{"objective": 1.5, "constraint": null, "error": null}
 ```
