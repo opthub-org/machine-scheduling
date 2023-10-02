@@ -1,13 +1,16 @@
 import json
+import os
 import os.path
 import random
-import subprocess
 import re
+import subprocess
 import time
-from typing import List
 from traceback import format_exc
+from typing import List, Tuple
 
-import model
+from jsonschema import validate
+
+from . import model
 
 problem_file = "work_test.txt"
 jig_file = "jig_origin.csv"
@@ -103,6 +106,63 @@ def evaluation(solution: List[int], timeout: int = 300) -> float:
         os.remove(sol_file)
 
     return obj
+
+
+def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
+    """JSON文字列を脱直列化し，データを検証する．
+
+    Parameters
+    ----------
+    json_str : str
+        '{
+            "var": [work1_load, work1_unload, work2_load, ...],
+            "timeout": Time limit for SCIP
+        }'
+    work_num : int
+        Numer of Works
+
+    Returns
+    -------
+    var : List[int]
+        List of decision variables (a single solution).
+    timeout : int
+        Time limit for SCIP
+    """
+    schema_args = dict(
+        var_len=2*work_num,
+        var_min=1,
+        var_max=9,
+        time_min=5*60,
+        time_max=8*60*60
+    )
+    schema = """{
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "decision variable schema",
+        "type": "object",
+        "properties": {
+            "var": {
+                "type": "array",
+                "minItems": %(var_len)d,
+                "maxItems": %(var_len)d,
+                "items": {
+                    "type": "integer",
+                    "minimum": %(var_min)d,
+                    "maximum": %(var_max)d
+                }
+            },
+            "timeout": {
+                "type": "integer",
+                "minimum": %(time_min)d,
+                "maximum": %(time_max)d
+            }
+        },
+        "required": ["var", "timeout"]
+    }""" % schema_args
+
+    data = json.loads(json_str)
+    validate(data, json.loads(schema))
+
+    return data["var"], data["timeout"]
 
 
 def main():
