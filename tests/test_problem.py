@@ -2,7 +2,7 @@ import unittest
 import json
 from jsonschema import ValidationError
 
-from ..problem import load_val_json
+from problem import load_val_json
 
 
 class TestLoadValJSON(unittest.TestCase):
