@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 from jsonschema import validate
 
-from . import model
+import model
 
 problem_file = "work_test.txt"
 jig_file = "jig_origin.csv"
