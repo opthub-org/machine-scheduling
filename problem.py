@@ -4,6 +4,7 @@ import os.path
 import random
 import re
 import subprocess
+import sys
 import time
 from traceback import format_exc
 from typing import List, Tuple
@@ -172,15 +173,23 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
 
 
 def main():
-    var_json = input()
-    var = json.loads(var_json)
+    work_num = os.getenv("WORK_NUM", 5)
+    str_json = sys.stdin.read()
     # ここでフォーマットの検証などをjsonschemaでやる
     # 設計変数の数：ワークの総加工数の2倍（取付、取外）
     # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
     # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
+    var, timeout = load_val_json(str_json, work_num)
 
-    obj = evaluation(var)
-    out_json = json.dumps({"objective": obj, "constraint": None, "error": None})
+    obj, exe_time = evaluation(var, timeout)
+    out_json = json.dumps({
+        "objective": obj,
+        "constraint": None,
+        "error": None,
+        "info": {
+            "exe_time": exe_time
+        }
+    })
     print(out_json)
 
 
