@@ -69,10 +69,7 @@ class TestLoadValJSON(unittest.TestCase):
         """
         json_str = '{"var": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
 
-        try:
-            var_out, time_out = load_val_json(json_str, 2)
-        except ValidationError:
-            self.fail("Unexpected Exception on Validation")
+        var_out, time_out = load_val_json(json_str, 2)
 
         self.assertEqual([1, 2, 3, 4], var_out)
         self.assertEqual(500, time_out)
