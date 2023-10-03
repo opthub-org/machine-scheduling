@@ -67,20 +67,22 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-def evaluation(solution: List[int], timeout: int = 300) -> float:
+def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, float]:
     """SCIPを起動して評価値を計算する。
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     solution
         [work1_load, work1_unload, work2_load, ...]
     timeout
         Time limit for SCIP
 
-    Return
-    ------
-    float
+    Returns
+    -------
+    obj : float
         Objective function value.
+    exe_time : float
+        Execution time of SCIP.
     """
     obj = float("-inf")
     model.write_lp(solution, lp_file, problem_file, jig_file)
@@ -91,10 +93,14 @@ def evaluation(solution: List[int], timeout: int = 300) -> float:
         f.write("display solution\n")
         f.write(f"write solution {sol_file}\n")
         f.write("quit")
+
+    time_s = time.perf_counter()
     subprocess.run(
         f"scip -l Log/Log{int(time.time())}.log -b {scip_command_file}",
         shell=True,
     )
+    time_e = time.perf_counter()
+    exe_time = time_e - time_s
 
     if os.path.isfile(lp_file):
         with open(sol_file, "r") as f:
@@ -105,7 +111,7 @@ def evaluation(solution: List[int], timeout: int = 300) -> float:
                     break
         os.remove(sol_file)
 
-    return obj
+    return obj, exe_time
 
 
 def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
@@ -129,11 +135,11 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
         Time limit for SCIP
     """
     schema_args = dict(
-        var_len=2*work_num,
+        var_len=2 * work_num,
         var_min=1,
         var_max=9,
-        time_min=5*60,
-        time_max=8*60*60
+        time_min=5 * 60,
+        time_max=8 * 60 * 60
     )
     schema = """{
         "$schema": "http://json-schema.org/draft-07/schema#",
