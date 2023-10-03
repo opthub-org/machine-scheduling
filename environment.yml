@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - default
+dependencies:
+  - python==3.11.4
+  - gcg
+  - jsonschema
+  - papilo
+  - scip
+  - soplex
+  - zimpl
