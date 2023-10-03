@@ -135,39 +135,37 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
     timeout : int
         Time limit for SCIP
     """
-    schema_args = dict(
-        var_len=2 * work_num,
-        var_min=1,
-        var_max=9,
-        time_min=5 * 60,
-        time_max=8 * 60 * 60
-    )
-    schema = """{
+    var_len = 2 * work_num
+    var_min = 1
+    var_max = 9
+    time_min = 5 * 60
+    time_max = 8 * 60 * 60
+    schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "decision variable schema",
         "type": "object",
         "properties": {
             "var": {
                 "type": "array",
-                "minItems": %(var_len)d,
-                "maxItems": %(var_len)d,
+                "minItems": var_len,
+                "maxItems": var_len,
                 "items": {
                     "type": "integer",
-                    "minimum": %(var_min)d,
-                    "maximum": %(var_max)d
+                    "minimum": var_min,
+                    "maximum": var_max
                 }
             },
             "timeout": {
                 "type": "integer",
-                "minimum": %(time_min)d,
-                "maximum": %(time_max)d
+                "minimum": time_min,
+                "maximum": time_max
             }
         },
         "required": ["var", "timeout"]
-    }""" % schema_args
+    }
 
     data = json.loads(json_str)
-    validate(data, json.loads(schema))
+    validate(data, schema)
 
     return data["var"], data["timeout"]
 
