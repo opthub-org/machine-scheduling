@@ -63,15 +63,6 @@ class TestLoadValJSON(unittest.TestCase):
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
 
-    def test_error_extra_property(self):
-        """
-        関係ないプロパティは許容しない
-        """
-        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
-
-        with self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
     def test_error_time_range(self):
         """
         時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
@@ -136,26 +127,25 @@ class TestLoadValJSON(unittest.TestCase):
         with self.subTest(type="List"), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
-    def test_error_property(self):
+    def test_error_extra_property(self):
         """
-        json_str = '{
-            "schedule": [work1_load, work1_unload, work2_load, ...],
-            "timeout": Time limit for SCIP
-        }'
+        関係ないプロパティは許容しない
         """
-        json_str = '{"dec": [1, 2, 3, 4], "timeout": 500}'
+        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
+
+        with self.assertRaises(ValidationError):
+            load_val_json(json_str, 2)
+
+    def test_error_lack_property(self):
+        """
+        "schedule"と"timeout"は必須．
+        """
+        json_str = '{"timeout": 500}'
         with self.subTest(prop="schedule"), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
-        json_str = '{"schedule": [1, 2, 3, 4], "time": 500}'
-        with self.subTest(prop="timeout"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
         json_str = '{"schedule": [1, 2, 3, 4]}'
-        with self.subTest(prop="less-timeout"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-        with self.subTest(prop="less-schedule"), self.assertRaises(ValidationError):
+        with self.subTest(prop="timeout"), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
 
