@@ -122,7 +122,7 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
     ----------
     json_str : str
         '{
-            "var": [work1_load, work1_unload, work2_load, ...],
+            "schedule": [work1_load, work1_unload, work2_load, ...],
             "timeout": Time limit for SCIP
         }'
     work_num : int
@@ -130,29 +130,29 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
 
     Returns
     -------
-    var : List[int]
-        List of decision variables (a single solution).
+    schedule : List[int]
+        Schedule (design variables).
     timeout : int
         Time limit for SCIP
     """
-    var_len = 2 * work_num
-    var_min = 1
-    var_max = 9
+    schedule_len = 2 * work_num
+    schedule_min = 1
+    schedule_max = 9
     time_min = 5 * 60
     time_max = 8 * 60 * 60
     schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "decision variable schema",
+        "title": "input schema",
         "type": "object",
         "properties": {
-            "var": {
+            "schedule": {
                 "type": "array",
-                "minItems": var_len,
-                "maxItems": var_len,
+                "minItems": schedule_len,
+                "maxItems": schedule_len,
                 "items": {
                     "type": "integer",
-                    "minimum": var_min,
-                    "maximum": var_max
+                    "minimum": schedule_min,
+                    "maximum": schedule_max
                 }
             },
             "timeout": {
@@ -162,13 +162,13 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
             }
         },
         "additionalProperties": False,
-        "required": ["var", "timeout"]
+        "required": ["schedule", "timeout"]
     }
 
     data = json.loads(json_str)
     validate(data, schema)
 
-    return data["var"], data["timeout"]
+    return data["schedule"], data["timeout"]
 
 
 def main():
@@ -178,9 +178,9 @@ def main():
     # 設計変数の数：ワークの総加工数の2倍（取付、取外）
     # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
     # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
-    var, timeout = load_val_json(str_json, work_num)
+    schedule, timeout = load_val_json(str_json, work_num)
 
-    obj, exe_time = evaluation(var, timeout)
+    obj, exe_time = evaluation(schedule, timeout)
     out_json = json.dumps({
         "objective": obj,
         "constraint": None,
