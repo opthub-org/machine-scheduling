@@ -63,16 +63,14 @@ class TestLoadValJSON(unittest.TestCase):
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
 
-    def test_semi_normal_property(self):
+    def test_error_extra_property(self):
         """
-        "var"と"timeout"以外のプロパティがあっても一応OK?
+        関係ないプロパティは許容しない
         """
         json_str = '{"var": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
 
-        var_out, time_out = load_val_json(json_str, 2)
-
-        self.assertEqual([1, 2, 3, 4], var_out)
-        self.assertEqual(500, time_out)
+        with self.assertRaises(ValidationError):
+            load_val_json(json_str, 2)
 
     def test_error_time_range(self):
         """
@@ -154,7 +152,11 @@ class TestLoadValJSON(unittest.TestCase):
             load_val_json(json_str, 2)
 
         json_str = '{"var": [1, 2, 3, 4]}'
-        with self.subTest(prop="less"), self.assertRaises(ValidationError):
+        with self.subTest(prop="less-timeout"), self.assertRaises(ValidationError):
+            load_val_json(json_str, 2)
+
+        json_str = '{"timeout": 500}'
+        with self.subTest(prop="less-schedule"), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
 

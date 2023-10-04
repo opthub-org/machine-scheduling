@@ -161,6 +161,7 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
                 "maximum": time_max
             }
         },
+        "additionalProperties": False,
         "required": ["var", "timeout"]
     }
 
