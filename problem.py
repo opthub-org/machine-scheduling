@@ -68,7 +68,7 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, float]:
+def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[float], float]:
     """SCIPを起動して評価値を計算する。
 
     Parameters
@@ -82,6 +82,8 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, float]:
     -------
     obj : float
         Objective function value.
+    const : List[float]
+        Constraint values.
     exe_time : float
         Execution time of SCIP.
     """
@@ -103,16 +105,30 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, float]:
     time_e = time.perf_counter()
     exe_time = time_e - time_s
 
+    with open(problem_file, "r") as f:
+        problem = f.readline().strip().split()
+    work_num = int(problem[0]) - 12
+    const = [0.0] * work_num
+
     if os.path.isfile(lp_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
-            for row in data:
-                if "objective value:" in row:
-                    obj = float(row.strip("\n").split(" ")[-1])
-                    break
+        for row in data:
+            if row == "":
+                continue
+            # 目的関数値を取得
+            if "objective value:" in row:
+                obj = float(row.strip("\n").split(" ")[-1])
+            # 各ワークの納期遅れ量を取得
+            if "psiP" in row:
+                val = row.strip("\n").split(" ")
+                val = [i for i in val if not i == ""]
+                num = int(val[0][4:])
+                if num > 12:
+                    const[num - 12 - 1] = float(val[-2])
         os.remove(sol_file)
 
-    return obj, exe_time
+    return obj, const, exe_time
 
 
 def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
@@ -180,10 +196,10 @@ def main():
     # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
     schedule, timeout = load_val_json(str_json, work_num)
 
-    obj, exe_time = evaluation(schedule, timeout)
+    obj, const, exe_time = evaluation(schedule, timeout)
     out_json = json.dumps({
         "objective": obj,
-        "constraint": None,
+        "constraint": const,
         "error": None,
         "info": {
             "exe_time": exe_time
