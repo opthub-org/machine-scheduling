@@ -188,7 +188,7 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
 
 
 def main():
-    work_num = os.getenv("WORK_NUM", 5)
+    work_num = int(os.getenv("WORK_NUM", 5))
     str_json = sys.stdin.read()
     # ここでフォーマットの検証などをjsonschemaでやる
     # 設計変数の数：ワークの総加工数の2倍（取付、取外）
