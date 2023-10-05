@@ -136,7 +136,15 @@ def write_lp(
 
     f = open(lp_file, "w")
     f.write("maximize\n")
-    f.write('psiR - 2 psiP\n')  # 1 納期余裕と納期遅れペナルティ
+    count = 0
+    for k in range(W):
+        count += Nj[k]
+        f.write(" - tf{}".format(count))  # ワークの納品時刻
+    f.write(' - psiP')  # 納期遅れペナルティ
+    count = 0
+    for k in range(W):
+        count += int(lead_time[k]) * 1440 - T
+    f.write(" + {}\n".format(count))  # 納期
     f.write("subject to\n")
 
     # 解固定
@@ -147,10 +155,10 @@ def write_lp(
         k += 2
         f.write("c{2}: y({0},{1}) = 1\n".format(sol, k, line_count()))
 
-    f.write('c{}:'.format(line_count()))
-    for i in range(W):
-        f.write(' + psiR{}'.format(i + 1))
-    f.write(' - psiR = 0\n')
+    # f.write('c{}:'.format(line_count()))
+    # for i in range(W):
+    #     f.write(' + psiR{}'.format(i + 1))
+    # f.write(' - psiR = 0\n')
 
     f.write("c{}:".format(line_count()))
     for i in range(W):
@@ -179,7 +187,7 @@ def write_lp(
     count = 0  # 納期余裕と納期遅れ
     for i in range(0, len(usable_day)):  # 2
         count += Nj[i]
-        f.write('c{3}: psiR{0} + tf{1} <= {2}\n'.format(i + 1, count, int(lead_time[i]) * 1440 - T, line_count()))
+        # f.write('c{3}: psiR{0} + tf{1} <= {2}\n'.format(i + 1, count, int(lead_time[i]) * 1440 - T, line_count()))
         f.write("c{3}: tf{0} - psiP{1} <= {2}\n".format(count, i + 1, int(lead_time[i]) * 1440 - T, line_count()))
 
     count = 0
