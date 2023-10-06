@@ -122,6 +122,8 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
             if "psiP" in row:
                 val = row.strip("\n").split(" ")
                 val = [i for i in val if not i == ""]
+                if len(val[0]) <= 4:
+                    continue
                 num = int(val[0][4:])
                 if num > 12:
                     const[num - 12 - 1] = float(val[-2])
