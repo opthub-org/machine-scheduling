@@ -109,7 +109,7 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
     work_num = int(problem[0]) - 12
     const = [0.0] * work_num
 
-    if os.path.isfile(lp_file):
+    if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
         for row in data:
