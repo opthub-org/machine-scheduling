@@ -4,7 +4,6 @@ import os.path
 import random
 import re
 import subprocess
-import sys
 import time
 from traceback import format_exc
 from typing import List, Tuple
@@ -110,7 +109,7 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
     work_num = int(problem[0]) - 12
     const = [0.0] * work_num
 
-    if os.path.isfile(lp_file):
+    if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
         for row in data:
@@ -123,6 +122,8 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
             if "psiP" in row:
                 val = row.strip("\n").split(" ")
                 val = [i for i in val if not i == ""]
+                if len(val[0]) <= 4:
+                    continue
                 num = int(val[0][4:])
                 if num > 12:
                     const[num - 12 - 1] = float(val[-2])
@@ -188,8 +189,10 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
 
 
 def main():
-    work_num = int(os.getenv("WORK_NUM", 5))
-    str_json = sys.stdin.read()
+    with open(problem_file, "r") as f:
+        problem = f.readline().strip().split()
+    work_num = int(problem[0]) - 12
+    str_json = input()
     # ここでフォーマットの検証などをjsonschemaでやる
     # 設計変数の数：ワークの総加工数の2倍（取付、取外）
     # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
