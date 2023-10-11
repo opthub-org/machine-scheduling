@@ -202,10 +202,11 @@ def main():
     obj, const, exe_time = evaluation(schedule, timeout)
     out_json = json.dumps({
         "objective": obj,
-        "constraint": const,
+        "constraint": None,
         "error": None,
         "info": {
-            "exe_time": exe_time
+            "exe_time": exe_time,
+            "delays": const
         }
     })
     print(out_json)
