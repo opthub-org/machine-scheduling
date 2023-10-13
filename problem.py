@@ -190,8 +190,10 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
 
 def main():
     with open(problem_file, "r") as f:
-        problem = f.readline().strip().split()
-    work_num = int(problem[0]) - 12
+        problem = f.readlines()
+    problem = [row.replace("\n", "").split(" ") for row in problem]
+    work_num = int(problem[0][0]) - 12  # ワーク数
+    process_num = sum([int(len(n) / 7) for n in problem[13:]])  # 加工回数（scheduleの配列長）
     str_json = input()
     # ここでフォーマットの検証などをjsonschemaでやる
     # 設計変数の数：ワークの総加工数の2倍（取付、取外）
