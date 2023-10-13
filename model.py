@@ -58,7 +58,10 @@ def write_lp(
 
     pallet = 12
     T = 960
-    D = 9  # スケジュール期間
+    if len(solution) > 0:
+        D = max(solution)  # スケジュール期間
+    else:
+        D = 9
     # A = 1440 * (D + 1)\
     A = 1000000
     NS = [480 + 1440 * i for i in range(D)]
