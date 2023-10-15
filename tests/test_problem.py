@@ -86,6 +86,15 @@ class TestLoadValJSON(unittest.TestCase):
         with self.subTest(prop="timeout"), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
+    def test_error_extra_property(self):
+        """
+        `schedule`と`timeout`の2プロパティ以外を許容しない．
+        """
+        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
+
+        with self.assertRaises(ValidationError):
+            load_val_json(json_str, 2)
+
     def test_error_time_range(self):
         """
         時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
@@ -148,15 +157,6 @@ class TestLoadValJSON(unittest.TestCase):
 
         json_str = '{"schedule": [1, "2", 3.1, 4], "timeout": 500}'
         with self.subTest(type="List"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-    def test_error_extra_property(self):
-        """
-        関係ないプロパティは許容しない
-        """
-        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
-
-        with self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
 
 
