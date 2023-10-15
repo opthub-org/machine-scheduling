@@ -40,7 +40,7 @@ class TestLoadValJSON(unittest.TestCase):
         """
         n_work = 4
         for date in range(1, 20):
-            schedule = [5 for _ in range(n_work)]
+            schedule = [date // 2 + 1 for _ in range(n_work)]
             data = dict(schedule=schedule, timeout=500)
             json_str = json.dumps(data)
             with self.subTest(max_date=date):
