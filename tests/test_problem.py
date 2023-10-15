@@ -17,6 +17,24 @@ class TestLoadValJSON(unittest.TestCase):
         self.assertEqual([1, 2, 3, 4], schedule_out)
         self.assertEqual(500, time_out)
 
+    def test_normal_schedule_len(self):
+        """
+        len(schedule) == n_work
+        """
+        n_works = list(range(0, 31, 5))
+        n_works[0] = 1
+        for n in n_works:
+            schedule = [5 for _ in range(n)]
+            data = dict(schedule=schedule, timeout=500)
+            json_str = json.dumps(data)
+            with self.subTest(n_work=n):
+                try:
+                    schedule_out, _ = load_val_json(json_str, n, 9)
+                except ValidationError:
+                    self.fail("Unexpected Exception on Validation")
+
+                self.assertEqual(len(schedule_out), n)
+
     def test_normal_time_range(self):
         """
         時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
@@ -30,24 +48,6 @@ class TestLoadValJSON(unittest.TestCase):
                     load_val_json(json_str, 2)
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
-
-    def test_normal_schedule_len(self):
-        """
-        設計変数の数：ワークの総加工数の2倍（取付、取外）
-        """
-        num_works = list(range(0, 31, 5))
-        num_works[0] = 1
-        for n in num_works:
-            schedule = [5 for _ in range(2 * n)]
-            data = dict(schedule=schedule, timeout=500)
-            json_str = json.dumps(data)
-            with self.subTest(num_work=n):
-                try:
-                    schedule_out, _ = load_val_json(json_str, n)
-                except ValidationError:
-                    self.fail("Unexpected Exception on Validation")
-
-                self.assertEqual(len(schedule_out), 2 * n)
 
     def test_normal_schedule_range(self):
         """
