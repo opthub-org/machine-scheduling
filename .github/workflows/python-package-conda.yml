@@ -23,6 +23,7 @@ jobs:
       with:
         path: /opt/conda/pkgs
         key: conda-${{ runner.os }}-${{ hashFiles('environment.yml') }}
+      id: cache
     - name: Install dependencies
       run: |
         conda env update --file environment.yml --name base
