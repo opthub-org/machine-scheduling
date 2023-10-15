@@ -74,7 +74,7 @@ class TestLoadValJSON(unittest.TestCase):
                 self.assertGreaterEqual(timeout_out, 5 * 60)
                 self.assertLessEqual(timeout_out, 8 * 60 * 60)
 
-    def test_error_lack_property(self):
+    def test_error_must_property(self):
         """
         `schedule`と`timeout`の2プロパティは必須．
         """
