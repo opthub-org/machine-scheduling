@@ -8,11 +8,11 @@ from problem import load_val_json
 class TestLoadValJSON(unittest.TestCase):
     def test_normal_load(self):
         """
-        JSON文字列を正常に脱直列化し，設計変数，時間変数それぞれに対応する2値を返す．
+        JSON文字列を正常に脱直列化および検証し，入力仕様に適合する場合，設計変数，時間変数それぞれに対応する2値を返す．
         """
         json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500}'
 
-        schedule_out, time_out = load_val_json(json_str, 2)
+        schedule_out, time_out = load_val_json(json_str, 4, 9)
 
         self.assertEqual([1, 2, 3, 4], schedule_out)
         self.assertEqual(500, time_out)
