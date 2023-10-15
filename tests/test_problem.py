@@ -43,18 +43,19 @@ class TestLoadValJSON(unittest.TestCase):
         min(schedule) >= 1 and max(schedule) <= max_date
         """
         n_work = 4
-        for date in range(1, 20):
-            schedule = [date // 2 + 1 for _ in range(n_work)]
-            data = dict(schedule=schedule, timeout=500)
-            json_str = json.dumps(data)
-            with self.subTest(max_date=date):
-                try:
-                    schedule_out, _ = load_val_json(json_str, n_work, date)
-                except ValidationError:
-                    self.fail("Unexpected Exception on Validation")
+        for max_date in range(1, 21):
+            for date in range(1, max_date):
+                schedule = [date for _ in range(n_work)]
+                data = dict(schedule=schedule, timeout=500)
+                json_str = json.dumps(data)
+                with self.subTest(max_date=max_date, date=date):
+                    try:
+                        schedule_out, _ = load_val_json(json_str, n_work, max_date)
+                    except ValidationError:
+                        self.fail("Unexpected Exception on Validation")
 
-                self.assertGreaterEqual(min(schedule_out), 1)
-                self.assertLessEqual(max(schedule_out), date)
+                    self.assertGreaterEqual(min(schedule_out), 1)
+                    self.assertLessEqual(max(schedule_out), max_date)
 
     def test_normal_time_range(self):
         """
