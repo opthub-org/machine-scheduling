@@ -57,17 +57,22 @@ class TestLoadValJSON(unittest.TestCase):
 
     def test_normal_time_range(self):
         """
-        時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
+        5*60 <= timeout <= 8*60*60
         """
+        n_work = 4
+        max_date = 9
         times = [h * 60 * 60 for h in range(1, 9)]
         times.insert(0, 5 * 60)
         for t in times:
             json_str = '{"schedule": [1, 2, 3, 4], "timeout": %d}' % t
             with self.subTest(timeout=t):
                 try:
-                    load_val_json(json_str, 2)
+                    _, timeout_out = load_val_json(json_str, n_work, max_date)
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
+
+                self.assertGreaterEqual(timeout_out, 5 * 60)
+                self.assertLessEqual(timeout_out, 8 * 60 * 60)
 
     def test_error_time_range(self):
         """
