@@ -220,7 +220,7 @@ def main():
     schedule, timeout = load_val_json(str_json, n_work)
 
     obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
-    out_json = json.dumps({
+    json_out = json.dumps({
         "objective": obj,
         "constraint": None,
         "error": None,
@@ -229,7 +229,7 @@ def main():
             "delays": const
         }
     })
-    print(out_json)
+    print(json_out)
 
 
 if __name__ == "__main__":
