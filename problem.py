@@ -12,15 +12,13 @@ from jsonschema import validate
 
 import model
 
-problem_file = "work_test.txt"
-jig_file = "jig_origin.csv"
 scip_command_file = "command.txt"
 lp_file = "test.lp"
 sol_file = "test.sol"
 file_num = 27  # 初期解読み込み時の検索ファイル数
 
 
-def load_problem():
+def load_problem(problem_file):
     with open(problem_file, "r") as f:
         data = f.readlines()
     data = [row.replace("\n", "").split(" ") for row in data]
@@ -67,7 +65,7 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[float], float]:
+def evaluation(solution: List[int], timeout: int, problem_file: str, jig_file: str) -> Tuple[float, List[float], float]:
     """SCIPを起動して評価値を計算する。
 
     Parameters
@@ -76,6 +74,10 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
         [work1_load, work1_unload, work2_load, ...]
     timeout
         Time limit for SCIP
+    problem_file
+        path/to/problem_file
+    jig_file
+        path/to/jig_file
 
     Returns
     -------
@@ -199,7 +201,10 @@ def get_problem(default_problem: str = "work_test.txt", default_jig: str = "jig_
     jig_path = f"sops/{problem}/jig_{problem}.csv"
 
     return problem_path, jig_path
+
+
 def main():
+    problem_file, jig_file = get_problem()
     with open(problem_file, "r") as f:
         problem = f.readlines()
     problem = [row.replace("\n", "").split(" ") for row in problem]
@@ -212,7 +217,7 @@ def main():
     # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
     schedule, timeout = load_val_json(str_json, work_num)
 
-    obj, const, exe_time = evaluation(schedule, timeout)
+    obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
     out_json = json.dumps({
         "objective": obj,
         "constraint": None,
