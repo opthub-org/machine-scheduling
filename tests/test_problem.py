@@ -98,6 +98,37 @@ class TestLoadValJSON(unittest.TestCase):
         with self.assertRaises(ValidationError):
             load_val_json(json_str, n_work, max_date)
 
+    def test_error_schedule_type(self):
+        """
+        scheduleの型はList[int]
+        """
+        n_work = 4
+        max_date = 9
+
+        json_str = '{"schedule": "[1, 2, 3, 4]", "timeout": 500}'
+        with self.subTest(type="not array (str)"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": 1, "timeout": 500}'
+        with self.subTest(type="not array (int)"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": {"work_date1":1,"work_date2":2,"work_date3":3,"work_date4":4}, "timeout": 500}'
+        with self.subTest(type="not array (object)"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": [1.1, 2.1, 3.1, 4.1], "timeout": 500}'
+        with self.subTest(type="List[float]"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": ["1", "2", "3", "4"], "timeout": 500}'
+        with self.subTest(type="List[str]"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": [1, "2", 3.1, 4], "timeout": 500}'
+        with self.subTest(type="List[Any]"), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
     def test_error_time_range(self):
         """
         時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
@@ -141,26 +172,6 @@ class TestLoadValJSON(unittest.TestCase):
             json_str = json.dumps(data)
             with self.subTest(load=load), self.assertRaises(ValidationError):
                 load_val_json(json_str, 2)
-
-    def test_error_schedule_type(self):
-        """
-        設計変数は整数のリストで与えられる．
-        """
-        json_str = '{"schedule": "[1, 2, 3, 4]", "timeout": 500}'
-        with self.subTest(type="str"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-        json_str = '{"schedule": [1.1, 2.1, 3.1, 4.1], "timeout": 500}'
-        with self.subTest(type="List[float]"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-        json_str = '{"schedule": ["1", "2", "3", "4"], "timeout": 500}'
-        with self.subTest(type="List[str]"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-        json_str = '{"schedule": [1, "2", 3.1, 4], "timeout": 500}'
-        with self.subTest(type="List"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
 
 
 if __name__ == '__main__':
