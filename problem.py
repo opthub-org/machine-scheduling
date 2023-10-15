@@ -203,19 +203,21 @@ def get_problem_paths(default_problem: str = "work_test.txt", default_jig: str =
     return problem_path, jig_path
 
 
-def main():
-    problem_file, jig_file = get_problem_paths()
+def get_n_work(problem_file: str) -> int:
     with open(problem_file, "r") as f:
         problem = f.readlines()
     problem = [row.replace("\n", "").split(" ") for row in problem]
-    work_num = int(problem[0][0]) - 12  # ワーク数
     process_num = sum([int(len(n) / 7) for n in problem[13:]])  # 加工回数（scheduleの配列長）
+
+    return process_num
+
+
+def main():
+    problem_file, jig_file = get_problem_paths()
+    n_work = get_n_work(problem_file)
     str_json = input()
     # ここでフォーマットの検証などをjsonschemaでやる
-    # 設計変数の数：ワークの総加工数の2倍（取付、取外）
-    # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
-    # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
-    schedule, timeout = load_val_json(str_json, work_num)
+    schedule, timeout = load_val_json(str_json, n_work)
 
     obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
     out_json = json.dumps({
