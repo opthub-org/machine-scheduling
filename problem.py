@@ -132,7 +132,7 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
     return obj, const, exe_time
 
 
-def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
+def load_val_json(json_str: str, n_work: int, max_date: int = 9) -> Tuple[List[int], int]:
     """JSON文字列を脱直列化し，データを検証する．
 
     Parameters
@@ -142,8 +142,10 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
             "schedule": [work1_load, work1_unload, work2_load, ...],
             "timeout": Time limit for SCIP
         }'
-    work_num : int
-        Numer of Works
+    n_work : int
+        n_works = sum_i work_i
+    max_date: int , 9
+        Maximum date for schedule
 
     Returns
     -------
@@ -152,9 +154,9 @@ def load_val_json(json_str: str, work_num: int) -> Tuple[List[int], int]:
     timeout : int
         Time limit for SCIP
     """
-    schedule_len = 2 * work_num
+    schedule_len = n_work
     schedule_min = 1
-    schedule_max = 9
+    schedule_max = max_date
     time_min = 5 * 60
     time_max = 8 * 60 * 60
     schema = {
