@@ -10,9 +10,11 @@ class TestLoadValJSON(unittest.TestCase):
         """
         JSON文字列を正常に脱直列化および検証し，入力仕様に適合する場合，設計変数，時間変数それぞれに対応する2値を返す．
         """
+        n_work = 4
+        max_date = 9
         json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500}'
 
-        schedule_out, time_out = load_val_json(json_str, 4, 9)
+        schedule_out, time_out = load_val_json(json_str, n_work, max_date)
 
         self.assertEqual([1, 2, 3, 4], schedule_out)
         self.assertEqual(500, time_out)
@@ -21,6 +23,7 @@ class TestLoadValJSON(unittest.TestCase):
         """
         len(schedule) == n_work
         """
+        max_date = 9
         n_works = list(range(1, 31))
         for n in n_works:
             schedule = [5 for _ in range(n)]
@@ -28,7 +31,7 @@ class TestLoadValJSON(unittest.TestCase):
             json_str = json.dumps(data)
             with self.subTest(n_work=n):
                 try:
-                    schedule_out, _ = load_val_json(json_str, n, 9)
+                    schedule_out, _ = load_val_json(json_str, n, max_date)
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
 
