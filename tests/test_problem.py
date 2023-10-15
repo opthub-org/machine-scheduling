@@ -21,8 +21,7 @@ class TestLoadValJSON(unittest.TestCase):
         """
         len(schedule) == n_work
         """
-        n_works = list(range(0, 31, 5))
-        n_works[0] = 1
+        n_works = list(range(1, 31))
         for n in n_works:
             schedule = [5 for _ in range(n)]
             data = dict(schedule=schedule, timeout=500)
