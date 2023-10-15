@@ -1,6 +1,6 @@
 import unittest
 import json
-from itertools import permutations
+from itertools import permutations, count, filterfalse
 from jsonschema import ValidationError
 
 from problem import load_val_json
@@ -142,6 +142,19 @@ class TestLoadValJSON(unittest.TestCase):
             with self.subTest(n_work=n, len=l), self.assertRaises(ValidationError):
                 load_val_json(json_str, n, max_date)
 
+    def test_error_schedule_date_range(self):
+        """
+        min(schedule) >= 1 and max(schedule) <= max_date
+        """
+        n_work = 4
+        for max_date in range(1, 21):
+            for date in set(range(max_date + 11)) - set(range(1, max_date + 1)):
+                schedule = [date for _ in range(n_work)]
+                data = dict(schedule=schedule, timeout=500)
+                json_str = json.dumps(data)
+                with self.subTest(max_date=max_date, date=date), self.assertRaises(ValidationError):
+                    load_val_json(json_str, n_work, max_date)
+
     def test_error_time_range(self):
         """
         5*60 <= timeout <= 8*60*60
@@ -165,17 +178,6 @@ class TestLoadValJSON(unittest.TestCase):
         json_str = '{"schedule": [1, 2, 3, 4], "timeout": "500"}'
         with self.subTest(type=str), self.assertRaises(ValidationError):
             load_val_json(json_str, 2)
-
-    def test_error_schedule_rage(self):
-        """
-        各変数のとりうる値：1以上、9以下の整数（境界値を含む）
-        """
-        for load in [0, 10]:
-            schedule = [load for _ in range(4)]
-            data = dict(schedule=schedule, timeout=500)
-            json_str = json.dumps(data)
-            with self.subTest(load=load), self.assertRaises(ValidationError):
-                load_val_json(json_str, 2)
 
     def test_error_json_decode(self):
         """
