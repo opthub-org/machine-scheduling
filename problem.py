@@ -190,6 +190,15 @@ def load_val_json(json_str: str, n_work: int, max_date: int = 9) -> Tuple[List[i
     return data["schedule"], data["timeout"]
 
 
+def get_problem(default_problem: str = "work_test.txt", default_jig: str = "jig_origin.csv") -> Tuple[str, str]:
+    problem = os.getenv("PROBLEM")
+    if problem is None:
+        return default_problem, default_jig
+
+    problem_path = f"sops/{problem}/work_{problem}.txt"
+    jig_path = f"sops/{problem}/jig_{problem}.csv"
+
+    return problem_path, jig_path
 def main():
     with open(problem_file, "r") as f:
         problem = f.readlines()
