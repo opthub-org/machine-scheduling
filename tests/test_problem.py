@@ -34,6 +34,24 @@ class TestLoadValJSON(unittest.TestCase):
 
                 self.assertEqual(len(schedule_out), n)
 
+    def test_normal_schedule_date_range(self):
+        """
+        min(schedule) >= 1 and max(schedule) <= max_date
+        """
+        n_work = 4
+        for date in range(1, 20):
+            schedule = [5 for _ in range(n_work)]
+            data = dict(schedule=schedule, timeout=500)
+            json_str = json.dumps(data)
+            with self.subTest(max_date=date):
+                try:
+                    schedule_out, _ = load_val_json(json_str, n_work, date)
+                except ValidationError:
+                    self.fail("Unexpected Exception on Validation")
+
+                self.assertGreaterEqual(min(schedule_out), 1)
+                self.assertLessEqual(max(schedule_out), date)
+
     def test_normal_time_range(self):
         """
         時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下
@@ -45,20 +63,6 @@ class TestLoadValJSON(unittest.TestCase):
             with self.subTest(timeout=t):
                 try:
                     load_val_json(json_str, 2)
-                except ValidationError:
-                    self.fail("Unexpected Exception on Validation")
-
-    def test_normal_schedule_range(self):
-        """
-        各変数のとりうる値：1以上、9以下の整数（境界値を含む）
-        """
-        for load in range(1, 10):
-            schedule = [load for _ in range(4)]
-            data = dict(schedule=schedule, timeout=500)
-            json_str = json.dumps(data)
-            with self.subTest(load=load):
-                try:
-                    schedule_out, _ = load_val_json(json_str, 2)
                 except ValidationError:
                     self.fail("Unexpected Exception on Validation")
 
