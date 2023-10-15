@@ -78,22 +78,25 @@ class TestLoadValJSON(unittest.TestCase):
         """
         `schedule`と`timeout`の2プロパティは必須．
         """
+        n_work = 4
+        max_date = 9
         json_str = '{"timeout": 500}'
         with self.subTest(prop="schedule"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
+            load_val_json(json_str, n_work, max_date)
 
         json_str = '{"schedule": [1, 2, 3, 4]}'
         with self.subTest(prop="timeout"), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
+            load_val_json(json_str, n_work, max_date)
 
     def test_error_extra_property(self):
         """
         `schedule`と`timeout`の2プロパティ以外を許容しない．
         """
+        n_work = 4
+        max_date = 9
         json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500, "favorite": "ramen"}'
-
         with self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
+            load_val_json(json_str, n_work, max_date)
 
     def test_error_time_range(self):
         """
