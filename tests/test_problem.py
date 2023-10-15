@@ -173,6 +173,25 @@ class TestLoadValJSON(unittest.TestCase):
             with self.subTest(load=load), self.assertRaises(ValidationError):
                 load_val_json(json_str, 2)
 
+    def test_error_json_decode(self):
+        """
+        正常なJSON文字列である必要がある．
+        """
+        n_work = 4
+        max_date = 9
+
+        json_str = '{"schedule": 1, 2, 3, 4, "timeout": 500}'
+        with self.subTest(type="bracket"), self.assertRaises(json.decoder.JSONDecodeError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = """{'schedule': [1, 2, 3, 4], 'timeout': 500}"""
+        with self.subTest(type="quotation"), self.assertRaises(json.decoder.JSONDecodeError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500,}'
+        with self.subTest(type="end-comma"), self.assertRaises(json.decoder.JSONDecodeError):
+            load_val_json(json_str, n_work, max_date)
+
 
 if __name__ == '__main__':
     unittest.main()
