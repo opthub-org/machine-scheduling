@@ -22,7 +22,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /opt/conda/pkgs
-        key: conda-${{ runner.os }}-${{ hashFiles('environment.yml') }}
+        key: conda-${{ hashFiles('environment.yml') }}
       id: cache
     - name: Install dependencies
       run: |
