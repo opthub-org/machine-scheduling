@@ -148,7 +148,8 @@ def roulette(sol_list, eval_list):
 
 
 def main():
-    problem_data = problem.load_problem()
+    problem_file, jig_file = problem.get_problem_paths()
+    problem_data = problem.load_problem(problem_file)
     global N
     sol_list, eval_list = load_sample_sol(N)
     N = len(sol_list)
@@ -161,7 +162,7 @@ def main():
         mutation(new_sol, problem_data[13:])
         new_eval = []
         for sol in copy.deepcopy(new_sol):
-            e = problem.evaluation(sol)
+            e = problem.evaluation(sol, 600, problem_file, jig_file)
             if not e == float("-inf"):
                 new_eval.append(e)
                 log[i + 1].append("update")

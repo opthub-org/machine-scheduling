@@ -12,15 +12,13 @@ from jsonschema import validate
 
 import model
 
-problem_file = "work_test.txt"
-jig_file = "jig_origin.csv"
 scip_command_file = "command.txt"
 lp_file = "test.lp"
 sol_file = "test.sol"
 file_num = 27  # 初期解読み込み時の検索ファイル数
 
 
-def load_problem():
+def load_problem(problem_file):
     with open(problem_file, "r") as f:
         data = f.readlines()
     data = [row.replace("\n", "").split(" ") for row in data]
@@ -67,7 +65,7 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[float], float]:
+def evaluation(solution: List[int], timeout: int, problem_file: str, jig_file: str) -> Tuple[float, List[float], float]:
     """SCIPを起動して評価値を計算する。
 
     Parameters
@@ -76,6 +74,10 @@ def evaluation(solution: List[int], timeout: int = 300) -> Tuple[float, List[flo
         [work1_load, work1_unload, work2_load, ...]
     timeout
         Time limit for SCIP
+    problem_file
+        path/to/problem_file
+    jig_file
+        path/to/jig_file
 
     Returns
     -------
@@ -190,21 +192,35 @@ def load_val_json(json_str: str, n_work: int, max_date: int = 9) -> Tuple[List[i
     return data["schedule"], data["timeout"]
 
 
-def main():
+def get_problem_paths(default_problem: str = "work_test.txt", default_jig: str = "jig_origin.csv") -> Tuple[str, str]:
+    problem = os.getenv("PROBLEM")
+    if problem is None:
+        return default_problem, default_jig
+
+    problem_path = f"sops/{problem}/work_{problem}.txt"
+    jig_path = f"sops/{problem}/jig_{problem}.csv"
+
+    return problem_path, jig_path
+
+
+def get_n_work(problem_file: str) -> int:
     with open(problem_file, "r") as f:
         problem = f.readlines()
     problem = [row.replace("\n", "").split(" ") for row in problem]
-    work_num = int(problem[0][0]) - 12  # ワーク数
     process_num = sum([int(len(n) / 7) for n in problem[13:]])  # 加工回数（scheduleの配列長）
+
+    return process_num
+
+
+def main():
+    problem_file, jig_file = get_problem_paths()
+    n_work = get_n_work(problem_file)
     str_json = input()
     # ここでフォーマットの検証などをjsonschemaでやる
-    # 設計変数の数：ワークの総加工数の2倍（取付、取外）
-    # 各変数のとりうる値：1以上、9以下の整数（境界値を含む）
-    # 時間変数のとりうる範囲：5*60秒以上、8*60*60秒以下（通算評価時間が上限8時間を超えたときは、上限までをスコア計算に使う）
-    schedule, timeout = load_val_json(str_json, work_num)
+    schedule, timeout = load_val_json(str_json, n_work)
 
-    obj, const, exe_time = evaluation(schedule, timeout)
-    out_json = json.dumps({
+    obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
+    json_out = json.dumps({
         "objective": obj,
         "constraint": None,
         "error": None,
@@ -213,7 +229,7 @@ def main():
             "delays": const
         }
     })
-    print(out_json)
+    print(json_out)
 
 
 if __name__ == "__main__":
