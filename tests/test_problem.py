@@ -156,6 +156,20 @@ class TestLoadValJSON(unittest.TestCase):
                 with self.subTest(max_date=max_date, date=date), self.assertRaises(ValidationError):
                     load_val_json(json_str, n_work, max_date)
 
+    def test_error_time_type(self):
+        """
+        timeoutの型はint
+        """
+        n_work = 4
+        max_date = 9
+        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500.1}'
+        with self.subTest(type=float), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
+        json_str = '{"schedule": [1, 2, 3, 4], "timeout": "500"}'
+        with self.subTest(type=str), self.assertRaises(ValidationError):
+            load_val_json(json_str, n_work, max_date)
+
     def test_error_time_range(self):
         """
         5*60 <= timeout <= 8*60*60
@@ -167,18 +181,6 @@ class TestLoadValJSON(unittest.TestCase):
             json_str = '{"schedule": [1, 2, 3, 4], "timeout": %d}' % t
             with self.subTest(time=t), self.assertRaises(ValidationError):
                 load_val_json(json_str, n_work, max_date)
-
-    def test_error_time_type(self):
-        """
-        時間変数は整数で与えられる．
-        """
-        json_str = '{"schedule": [1, 2, 3, 4], "timeout": 500.1}'
-        with self.subTest(type=float), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
-
-        json_str = '{"schedule": [1, 2, 3, 4], "timeout": "500"}'
-        with self.subTest(type=str), self.assertRaises(ValidationError):
-            load_val_json(json_str, 2)
 
     def test_error_json_decode(self):
         """
