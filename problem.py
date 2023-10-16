@@ -212,12 +212,17 @@ def get_n_work(problem_file: str) -> int:
     return process_num
 
 
+def get_max_date(default_max: int = 9) -> int:
+    return int(os.getenv("MAX_DATE", default_max))
+
+
 def main():
     problem_file, jig_file = get_problem_paths()
     n_work = get_n_work(problem_file)
+    max_date = get_max_date()
     str_json = input()
     # ここでフォーマットの検証などをjsonschemaでやる
-    schedule, timeout = load_val_json(str_json, n_work)
+    schedule, timeout = load_val_json(str_json, n_work, max_date)
 
     obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
     json_out = json.dumps({
