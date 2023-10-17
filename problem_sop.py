@@ -197,8 +197,8 @@ def get_problem_paths(default_problem: str = "work_test.txt", default_jig: str =
     if problem is None:
         return default_problem, default_jig
 
-    problem_path = f"sops/{problem}/work_{problem}.txt"
-    jig_path = f"sops/{problem}/jig_{problem}.csv"
+    problem_path = f"problems/{problem}/work_{problem}.txt"
+    jig_path = f"problems/{problem}/jig_{problem}.csv"
 
     return problem_path, jig_path
 
