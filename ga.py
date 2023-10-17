@@ -4,7 +4,7 @@ import copy
 import re
 from typing import List
 
-import problem
+import problem_sop
 
 g = 30  # 世代数
 p_cross = 0.5  # 交叉率
