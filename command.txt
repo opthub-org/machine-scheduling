@@ -1,5 +1,5 @@
 read test.lp
-set limits time 300
+set limits time 500
 optimize
 display solution
 write solution test.sol
