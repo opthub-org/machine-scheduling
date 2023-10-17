@@ -11,7 +11,7 @@ docker build . -t opthub/machine-scheduling-sop:latest -f sop.dockerfile
 ## 実行方法
 コンテナを起動すると入力待ちになる。
 ```
-docker run -it -e MAX_DATE=3  opthub/machine-scheduling-sop:latest
+docker run -it -e MAX_DATE=20 -e PROBLEM=sop1 opthub/machine-scheduling-sop:latest
 ```
 
 解を入力し、Enterを押す。
