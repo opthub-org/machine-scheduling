@@ -21,8 +21,7 @@ docker run -it -e MAX_DATE=20 -e PROBLEM=sop1 opthub/machine-scheduling-sop:late
 
 しばらく待つと評価値が出力される。
 ```json
-{"objective": -4918.5, "constraint": null, "error": null, "info": {"exe_time": 500.56001581798773, "delays": [0.0, 0.0, 0.0, 0.0, 0.0, 1055.0, 2548.0, 4080.0, 5400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1200.0, 2485.0, 3925.0, 5527.0, 0.0
-]}}
+{"objective": -4918.5, "constraint": null, "error": null, "info": {"exe_time": 500.56001581798773, "delays": [0.0, 0.0, 0.0, 0.0, 0.0, 1055.0, 2548.0, 4080.0, 5400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1200.0, 2485.0, 3925.0, 5527.0, 0.0]}}
 ```
 
 ## 設定方法
