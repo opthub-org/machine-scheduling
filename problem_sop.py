@@ -5,7 +5,6 @@ import random
 import re
 import subprocess
 import time
-from traceback import format_exc
 from typing import List, Tuple
 
 from jsonschema import validate
@@ -240,8 +239,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except:
+    except Exception as e:
         out_json = json.dumps(
-            {"objective": None, "constraint": None, "error": format_exc()}
+            {"objective": None, "constraint": None, "info": None, "error": str(e)}
         )
         print(out_json)
