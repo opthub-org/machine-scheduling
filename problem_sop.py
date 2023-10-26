@@ -97,16 +97,15 @@ def evaluation(solution: List[int], timeout: int, problem_file: str, jig_file: s
         f.write(f"write solution {sol_file}\n")
         f.write("quit")
 
-    with open("/dev/null", "w") as f:
-        time_s = time.perf_counter()
-        subprocess.run(
-            f"scip -l Log/Log{int(time.time())}.log -b {scip_command_file}",
-            shell=True,
-            stdout=f,
-            stderr=f
-        )
-        time_e = time.perf_counter()
-        exe_time = time_e - time_s
+    time_s = time.perf_counter()
+    subprocess.run(
+        f"scip -l Log/Log{int(time.time())}.log -b {scip_command_file}",
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    time_e = time.perf_counter()
+    exe_time = time_e - time_s
 
     with open(problem_file, "r") as f:
         problem = f.readline().strip().split()
