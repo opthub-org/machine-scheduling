@@ -1,8 +1,5 @@
-import os.path
-import random
 import copy
-import re
-from typing import List
+import random
 
 import problem_sop
 import utils
@@ -13,45 +10,6 @@ p_mutate = 0.015  # 突然変異確率
 D = 5  # スケジュール日数
 N = 10  # 個体数
 file_num = 27  # 初期解読み込み時の検索ファイル数
-
-
-def load_sample_sol(n):
-    """初期解読み込み，n:初期解の数"""
-    sol_list, eval_list = [], []
-    table = [i for i in range(file_num)]
-    while len(sol_list) < n and table:
-        num = table.pop(random.randrange(0, len(table)))
-        if not os.path.isfile("Sol/sol_test{}.sol".format(num)):
-            print("sol_test{}.sol is not exist".format(num))
-            continue
-        with open("Sol/sol_test{}.sol".format(num), "r") as f:
-            sol_data = f.readlines()
-        obj = float("-inf")
-        k_d = {}
-        for row in sol_data:
-            if not row:
-                continue
-            if "objective value:" in row:
-                obj = float(row.strip("\n").split(" ")[-1])
-                continue
-            if row.startswith("y("):
-                sep_row = row.strip("\n").split(" ")
-                sep_row = [s for s in sep_row if not s == ""]
-                k_d.update(
-                    {
-                        int(re.findall(r",(.*)\)", sep_row[0])[0]): int(
-                            re.findall(r"\((.*),", sep_row[0])[0]
-                        )
-                    }
-                )
-        if obj == float("-inf") or obj >= 75000:
-            continue
-        sol_list.append(
-            [d[1] for d in sorted(k_d.items(), key=lambda x: x[0]) if d[0] > 36]
-        )
-        eval_list.append(obj)
-
-    return sol_list, eval_list
 
 
 def crossover(current_sol):
@@ -65,10 +23,10 @@ def crossover(current_sol):
         if random.random() < p_cross:
             index = random.randint(1, int(len(current_sol[0]) / 2) - 1)
             new_sol.append(
-                current_sol[i * 2][: index * 2] + current_sol[i * 2 + 1][index * 2 :]
+                current_sol[i * 2][: index * 2] + current_sol[i * 2 + 1][index * 2:]
             )
             new_sol.append(
-                current_sol[i * 2 + 1][: index * 2] + current_sol[i * 2][index * 2 :]
+                current_sol[i * 2 + 1][: index * 2] + current_sol[i * 2][index * 2:]
             )
 
     return new_sol
@@ -150,9 +108,9 @@ def roulette(sol_list, eval_list):
 
 def main():
     problem_file, jig_file = utils.get_problem_paths()
-    problem_data = problem_sop.load_problem(problem_file)
+    problem_data = utils.load_problem(problem_file)
     global N
-    sol_list, eval_list = load_sample_sol(N)
+    sol_list, eval_list = utils.load_sample_sol(N)
     N = len(sol_list)
     log = {}
     log["init"] = [(sol, e) for sol, e in zip(sol_list, eval_list)]
