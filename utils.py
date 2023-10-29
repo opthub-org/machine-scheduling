@@ -1,3 +1,7 @@
+import os
+from typing import Tuple
+
+
 def get_problem_paths(default_problem: str = "work_test.txt", default_jig: str = "jig_origin.csv") -> Tuple[str, str]:
     problem = os.getenv("PROBLEM")
     if problem is None:
