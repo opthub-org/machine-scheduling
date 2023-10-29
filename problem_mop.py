@@ -9,8 +9,8 @@ from typing import List, Tuple
 
 from jsonschema import validate
 
-import model
 from utils import get_problem_paths, get_n_work, get_max_date
+import model_mop
 
 scip_command_file = "command.txt"
 lp_file = "test.lp"
@@ -65,7 +65,13 @@ def load_sample_sol(n):
     return sol_list, eval_list
 
 
-def evaluation(solution: List[int], weights: List[float], timeout: int, problem_file: str, jig_file: str) -> Tuple[float, List[float], float]:
+def evaluation(
+        solution: List[int],
+        weights: List[float],
+        timeout: int,
+        problem_file: str,
+        jig_file: str
+) -> Tuple[List[float], float]:
     """SCIPを起動して評価値を計算する。
 
     Parameters
@@ -90,8 +96,7 @@ def evaluation(solution: List[int], weights: List[float], timeout: int, problem_
     exe_time : float
         Execution time of SCIP.
     """
-    obj = float("-inf")
-    model.write_lp(solution, lp_file, problem_file, jig_file)
+    model_mop.write_lp(solution, weights, lp_file, problem_file, jig_file)
     with open(scip_command_file, "w") as f:
         f.write(f"read {lp_file}\n")
         f.write(f"set limits time {timeout}\n")
@@ -111,31 +116,49 @@ def evaluation(solution: List[int], weights: List[float], timeout: int, problem_
     exe_time = time_e - time_s
 
     with open(problem_file, "r") as f:
-        problem = f.readline().strip().split()
-    work_num = int(problem[0]) - 12
-    const = [0.0] * work_num
+        problem = f.readlines()
+        problem = [row.split() for row in problem]
+
+    margin, xi, psiP, zP = 0.0, 0.0, 0.0, 0.0
 
     if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
+        tf_sum = 0.0  # 各ワークの納品時刻の合計値
+        tfs = []  # 各ワークの納品時刻変数名リスト
+        dead_sum = 0  # 納期の合計値
+        count = 0
+        for row in problem[1:]:
+            count += int(len(row) / 7) * 3
+            tfs.append(f"tf{count}")
+            dead_sum += int(row[-1]) * 1440 - 960
         for row in data:
             if row == "":
                 continue
-            # 目的関数値を取得
-            if "objective value:" in row:
-                obj = float(row.strip("\n").split(" ")[-1])
-            # 各ワークの納期遅れ量を取得
+            # 以下重み無し，項別目的関数値
+            # 各ワークの納品時刻を取得
+            if "tf" in row:
+                val = row.split()
+                if val[0] in tfs:
+                    tf_sum += float(val[-2])
+            # メイクスパンを取得（第2項）
+            if "xi" in row:
+                val = row.split()
+                xi = float(val[-2])
+            # 納期遅れ量の総和を取得（第3項）
             if "psiP" in row:
-                val = row.strip("\n").split(" ")
-                val = [i for i in val if not i == ""]
-                if len(val[0]) <= 4:
-                    continue
-                num = int(val[0][4:])
-                if num > 12:
-                    const[num - 12 - 1] = float(val[-2])
+                val = row.split()
+                if len(val[0]) == 4:
+                    psiP = float(val[-2])
+            # 残業時間の総和を取得（第4項）
+            if "zP" in row:
+                val = row.split()
+                if len(val[0]) == 2:
+                    zP = float(val[-2])
+        margin = dead_sum - tf_sum  # 納期余裕和（第1項）
         os.remove(sol_file)
 
-    return obj, const, exe_time
+    return [-margin, xi, psiP, zP], exe_time
 
 
 def load_val_json(json_str: str, n_work: int, max_date: int = 9) -> Tuple[List[int], List[float], int]:
@@ -220,14 +243,13 @@ def main():
     # ここでフォーマットの検証などをjsonschemaでやる
     schedule, weights, timeout = load_val_json(str_json, n_work, max_date)
 
-    objs, const, exe_time = evaluation(schedule, weights, timeout, problem_file, jig_file)
+    objs, exe_time = evaluation(schedule, weights, timeout, problem_file, jig_file)
     json_out = json.dumps({
         "objective": objs,
         "constraint": None,
         "error": None,
         "info": {
-            "exe_time": exe_time,
-            "delays": const
+            "exe_time": exe_time
         }
     })
     print(json_out)
