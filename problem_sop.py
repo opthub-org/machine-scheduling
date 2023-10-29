@@ -227,7 +227,7 @@ def main():
 
     obj, const, exe_time = evaluation(schedule, timeout, problem_file, jig_file)
     json_out = json.dumps({
-        "objective": obj,
+        "objective": -obj,
         "constraint": None,
         "error": None,
         "info": {
