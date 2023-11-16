@@ -24,9 +24,10 @@ def get_n_work(problem_file: str) -> int:
     with open(problem_file, "r") as f:
         problem = f.readlines()
     problem = [row.replace("\n", "").split(" ") for row in problem]
-    process_num = sum([int(len(n) / 7) for n in problem[13:]])  # 加工回数（scheduleの配列長）
+    process_num = sum([int(len(n) / 7) for n in problem[13:]])  # 加工回数
+    n_work = 2 * process_num  # scheduleの配列長
 
-    return process_num
+    return n_work
 
 
 def get_max_date(default_max: int = 9) -> int:
