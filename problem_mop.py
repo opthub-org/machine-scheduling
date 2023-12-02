@@ -53,8 +53,7 @@ def evaluation(
         problem = f.readlines()
         problem = [row.split() for row in problem]
 
-    fmax = [sys.float_info.max for _ in range(4)]
-    margin, xi, psiP, zP = fmax
+    margin, xi, psiP, zP = 0.0, 0.0, 0.0, 0.0
 
     if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
