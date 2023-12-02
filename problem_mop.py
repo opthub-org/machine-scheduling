@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+import sys
 from typing import List, Tuple
 
 from jsonschema import validate
@@ -52,7 +53,8 @@ def evaluation(
         problem = f.readlines()
         problem = [row.split() for row in problem]
 
-    margin, xi, psiP, zP = 0.0, 0.0, 0.0, 0.0
+    fmax = [sys.float_info.max for _ in range(4)]
+    margin, xi, psiP, zP = fmax
 
     if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
