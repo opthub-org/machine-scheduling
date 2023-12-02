@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+import sys
 from typing import List, Tuple
 
 from jsonschema import validate
@@ -18,7 +19,7 @@ def evaluation(
         timeout: int,
         problem_file: str,
         jig_file: str
-) -> Tuple[List[float], float]:
+) -> Tuple[List[float] | None, float]:
     """SCIPを起動して評価値を計算する。
 
     Parameters
@@ -52,11 +53,15 @@ def evaluation(
         problem = f.readlines()
         problem = [row.split() for row in problem]
 
-    margin, xi, psiP, zP = 0.0, 0.0, 0.0, 0.0
+    fmax = [sys.float_info.max for _ in range(4)]
+    margin, xi, psiP, zP = fmax
 
     if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
+        if data[0] == "solution status: infeasible\n":  # 実行不能
+            os.remove(sol_file)
+            return None, exe_time
         tf_sum = 0.0  # 各ワークの納品時刻の合計値
         tfs = []  # 各ワークの納品時刻変数名リスト
         dead_sum = 0  # 納期の合計値
