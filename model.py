@@ -152,11 +152,11 @@ def write_lp(
 
     # 解固定
     k = 3 * 12
-    for sol in solution:
+    for i in range(int(len(solution) / 2)):
         k += 1
-        f.write("c{2}: y({0},{1}) = 1\n".format(sol, k, line_count()))
+        f.write("c{2}: y({0},{1}) = 1\n".format(solution[2 * i], k, line_count()))
         k += 2
-        f.write("c{2}: y({0},{1}) = 1\n".format(sol, k, line_count()))
+        f.write("c{2}: y({0},{1}) = 1\n".format(solution[2 * i + 1], k, line_count()))
 
     # f.write('c{}:'.format(line_count()))
     # for i in range(W):
