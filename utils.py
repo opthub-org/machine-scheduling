@@ -2,7 +2,9 @@ import os
 import random
 import re
 import subprocess
+import sys
 import time
+from math import isnan, isinf
 from typing import Tuple
 
 file_num = 27  # 初期解読み込み時の検索ファイル数
@@ -102,3 +104,13 @@ def execute_scip() -> float:
     time_e = time.perf_counter()
     exe_time = time_e - time_s
     return exe_time
+
+
+def clamp_valid_number(x: float) -> float | None:
+    if isnan(x):
+        return None
+
+    if isinf(x):
+        return sys.float_info.max if x > 0 else -sys.float_info.max
+
+    return x

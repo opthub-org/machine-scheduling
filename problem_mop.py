@@ -7,7 +7,7 @@ from typing import List, Tuple
 from jsonschema import validate
 
 import model_mop
-from utils import get_problem_paths, get_n_work, get_max_date, write_command_file, execute_scip
+from utils import get_problem_paths, get_n_work, get_max_date, write_command_file, execute_scip, clamp_valid_number
 
 lp_file = "test.lp"
 sol_file = "test.sol"
@@ -95,6 +95,7 @@ def evaluation(
         margin = dead_sum - tf_sum  # 納期余裕和（第1項）
         os.remove(sol_file)
 
+    margin, xi, psiP, zP, exe_time = list(map(clamp_valid_number, [margin, xi, psiP, zP, exe_time]))
     return [-margin, xi, psiP, zP], exe_time
 
 

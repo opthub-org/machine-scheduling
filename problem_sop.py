@@ -6,7 +6,7 @@ from typing import List, Tuple
 from jsonschema import validate
 
 import model
-from utils import get_problem_paths, get_n_work, get_max_date, write_command_file, execute_scip
+from utils import get_problem_paths, get_n_work, get_max_date, write_command_file, execute_scip, clamp_valid_number
 
 lp_file = "test.lp"
 sol_file = "test.sol"
@@ -66,6 +66,9 @@ def evaluation(solution: List[int], timeout: int, problem_file: str, jig_file: s
                     const[num - 12 - 1] = float(val[-2])
         os.remove(sol_file)
 
+    obj = clamp_valid_number(obj)
+    const = list(map(clamp_valid_number, const))
+    exe_time = clamp_valid_number(exe_time)
     return obj, const, exe_time
 
 
