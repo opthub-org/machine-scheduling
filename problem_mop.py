@@ -58,7 +58,10 @@ def evaluation(
     if os.path.isfile(sol_file):
         with open(sol_file, "r") as f:
             data = f.readlines()
-        if data[0] == "solution status: infeasible\n":  # 実行不能
+        if data[0] in (
+            "solution status: infeasible\n",  # 実行不能
+            "solution status: time limit reached\n"  # 時間切れ
+        ):
             os.remove(sol_file)
             return None, exe_time
         tf_sum = 0.0  # 各ワークの納品時刻の合計値
